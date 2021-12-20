@@ -34,11 +34,41 @@ func _on_Save_pressed():
 	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = icon
 	$VBoxContainer/HBoxContainer/VBoxContainer/Options.grab_focus()
 	$Options.hide()
+	
+	###LoadingButtons
+func _on_Back_pressed():
+	SelectedMenu()
+	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = icon
+	$VBoxContainer/HBoxContainer/VBoxContainer/Loading.grab_focus()
+	$Loading.hide()
+	for child in $Loading/Scroll/VBoxContainer.get_children():
+		child.queue_free()
+		
+	###Menu focus on/off
 func SelectedMenu():
 	for button in get_tree().get_nodes_in_group(\"MenuButtons\"):
 		button.disabled = not button.disabled
 		if button.focus_mode == FOCUS_NONE: button.focus_mode = FOCUS_ALL
 		else: button.focus_mode = FOCUS_NONE
+		
+		
+func _on_Loading_pressed():
+	SelectedMenu()
+	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = paper
+	$Loading/Back.grab_focus()
+	var dirsave = Directory.new()
+	dirsave.open(\"res://Saves/\")
+	dirsave.list_dir_begin(true, false)
+	var file_name = dirsave.get_next()
+	var loadscene = load(\"res://Scenes/Save.tscn\")
+	var scene =  loadscene.instance()
+	while file_name != \"\":
+		$Loading/Scroll/VBoxContainer.add_child(scene)
+		scene =  loadscene.instance()
+		file_name = dirsave.get_next()
+		$Loading/Scroll/VBoxContainer.rect_min_size.y += 100
+		print($Loading/Scroll/VBoxContainer.get_children())
+	$Loading.show()
 		
 func DetectedFocus():
 	for button in get_tree().get_nodes_in_group(\"Buttons\"):
@@ -66,6 +96,9 @@ func _on_Smile_mouse_entered():
 	$Options/Speaker1/Smile.grab_focus()
 func _on_Save_mouse_entered():
 	$Options/Speaker2/Save.grab_focus()
+func _on_Back_mouse_entered():
+	$Loading/Back.grab_focus()
+
 
 	### Options
 func _on_Smile_toggled(button_pressed):
@@ -378,9 +411,67 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Loading" type="VBoxContainer" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 380.0
+margin_top = 190.0
+margin_right = -80.0
+margin_bottom = -40.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Scroll" type="ScrollContainer" parent="Loading"]
+margin_right = 564.0
+margin_bottom = 318.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+follow_focus = true
+scroll_horizontal_enabled = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Loading/Scroll"]
+margin_bottom = 100.0
+rect_min_size = Vector2( 0, 100 )
+custom_constants/separation = 100
+
+[node name="Back" type="Button" parent="Loading" groups=["Buttons"]]
+margin_top = 322.0
+margin_right = 564.0
+margin_bottom = 370.0
+rect_pivot_offset = Vector2( -744, 21 )
+focus_neighbour_top = NodePath("../../Speaker1/Smile")
+focus_neighbour_bottom = NodePath("../../Speaker1/Smile")
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.15
+custom_styles/focus = SubResource( 4 )
+flat = true
+
+[node name="Label" type="Label" parent="Loading/Back" groups=["Labels"]]
+margin_left = 15.0
+margin_right = 548.0
+margin_bottom = 55.0
+size_flags_stretch_ratio = 0.2
+custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
+custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
+custom_constants/shadow_offset_x = 3
+custom_constants/shadow_offset_y = -3
+custom_fonts/font = SubResource( 1 )
+text = "Back"
+align = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="mouse_entered" from="VBoxContainer/HBoxContainer/VBoxContainer/NewGame" to="." method="_on_NewGame_mouse_entered"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/VBoxContainer/NewGame" to="." method="_on_NewGame_pressed"]
 [connection signal="mouse_entered" from="VBoxContainer/HBoxContainer/VBoxContainer/Loading" to="." method="_on_Loading_mouse_entered"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/VBoxContainer/Loading" to="." method="_on_Loading_pressed"]
 [connection signal="mouse_entered" from="VBoxContainer/HBoxContainer/VBoxContainer/Options" to="." method="_on_Options_mouse_entered"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/VBoxContainer/Options" to="." method="_on_Options_pressed"]
 [connection signal="mouse_entered" from="VBoxContainer/HBoxContainer/VBoxContainer/Exit" to="." method="_on_Exit_mouse_entered"]
@@ -389,3 +480,5 @@ __meta__ = {
 [connection signal="toggled" from="Options/Speaker1/Smile" to="." method="_on_Smile_toggled"]
 [connection signal="mouse_entered" from="Options/Speaker2/Save" to="." method="_on_Save_mouse_entered"]
 [connection signal="pressed" from="Options/Speaker2/Save" to="." method="_on_Save_pressed"]
+[connection signal="mouse_entered" from="Loading/Back" to="." method="_on_Back_mouse_entered"]
+[connection signal="pressed" from="Loading/Back" to="." method="_on_Back_pressed"]

@@ -1,0 +1,227 @@
+[gd_scene load_steps=15 format=2]
+
+[ext_resource path="res://Sprites/mon1_sprite_addon_2012_12_14.png" type="Texture" id=1]
+
+[sub_resource type="GDScript" id=16]
+script/source = "extends KinematicBody2D
+onready var Global = get_node(\"/root/Global\")
+
+const speed = 20
+const gravity = 20
+const jump = 600
+var vel = Vector2()
+var on_look_now = \"right\"
+var on_look_last = \"right\"
+var anim = \"idle\"
+var dictionary_names = []
+var last_pos = position
+var tile_pos
+var half_tile
+var quicksave = {\"position\" : (Vector2(490, 420))}
+
+	#Function of Moving
+func Move():
+	if Input.is_action_pressed(\"A\") and not Input.is_action_pressed(\"D\"):
+		if vel.x > -400:
+			vel.x -= speed
+			on_look_now = \"left\"
+		if is_on_floor():
+			anim = \"walk\"
+	if Input.is_action_pressed(\"D\") and not Input.is_action_pressed(\"A\"):
+		if vel.x < 400:
+			vel.x += speed
+			on_look_now = \"right\"
+		if is_on_floor():
+			anim = \"walk\"
+	if (not Input.is_action_pressed(\"D\") and not Input.is_action_pressed(\"A\")) or (Input.is_action_pressed(\"D\") and Input.is_action_pressed(\"A\")):
+		if vel.x > 0:
+			if vel.x >= speed:
+				vel.x -= speed
+			else:
+				vel.x -= 1
+		elif vel.x < 0:
+			if vel.x <= -speed:
+				vel.x += speed
+			else:
+				vel.x += 1
+		if is_on_floor():
+			anim = \"idle\"
+		###  Rotation
+	if on_look_now != on_look_last:
+		on_look_last = on_look_now
+		self.scale.x = -self.scale.x
+		###  Jump
+	if Input.is_action_just_pressed(\"SPACE\"):
+		if is_on_floor() and !Input.is_action_pressed(\"S\"):
+			vel.y = -jump
+		elif is_on_wall():
+			vel.y = -jump * 0.8
+			var a
+			if on_look_now == \"right\" : a = -1
+			elif on_look_now == \"left\": a = 1
+			vel.x += 500 * a
+	if not Input.is_action_pressed(\"SPACE\") and vel.y < -100:
+		vel.y += -1 * (0.2 * vel.y)
+	if not is_on_floor():
+		if vel.y < 0:
+			anim = \"jump\"
+		else:
+			anim = \"fall\"
+
+	#Death Function
+func death():
+	position = quicksave[\"position\"]
+	vel = Vector2()
+
+	#Determination of the contact surface
+func contact_surface():
+	if last_pos != position:
+		dictionary_names.clear()
+		last_pos = position
+		for i in range(get_slide_count()):
+			if i == 0:
+				var collision = get_slide_collision(i)
+				var mypos = collision.collider.world_to_map(position)
+				if is_on_ceiling() or is_on_floor():
+					if is_on_floor():
+						tile_pos = Vector2(int(mypos.x / 2), int(mypos.y / 2 + 2))
+						half_tile = Vector2(int(mypos.x / 2), int(mypos.y / 2 + 1))
+					elif is_on_ceiling():
+						tile_pos = Vector2(int(mypos.x / 2), int(mypos.y / 2 - 1))
+						half_tile = Vector2(int(mypos.x / 2), int(mypos.y / 2))
+					if collision.collider.get_cellv(tile_pos) != -1:
+						dictionary_names.append(collision.collider.tile_set.tile_get_name(collision.collider.get_cellv(tile_pos)))
+					if collision.collider.get_cellv(half_tile) != -1:
+						dictionary_names.append(collision.collider.tile_set.tile_get_name(collision.collider.get_cellv(half_tile)))
+				if is_on_wall():
+					half_tile = Vector2(int(mypos.x / 2), int(mypos.y / 2))
+					for a in [-1, 1]:
+						tile_pos = Vector2(int(mypos.x / 2 + a), int(mypos.y / 2))
+						if collision.collider.get_cellv(tile_pos) != -1:
+							dictionary_names.append(collision.collider.tile_set.tile_get_name(collision.collider.get_cellv(tile_pos)))
+					if collision.collider.get_cellv(half_tile) != -1:
+						dictionary_names.append(collision.collider.tile_set.tile_get_name(collision.collider.get_cellv(half_tile)))
+					if collision.collider.get_cellv(Vector2(half_tile.x, half_tile.y + 1)) != -1:
+						dictionary_names.append(collision.collider.tile_set.tile_get_name(collision.collider.get_cellv(Vector2(half_tile.x, half_tile.y + 1))))
+		
+		if dictionary_names.count(\"Thorns\"):
+			death()
+		if dictionary_names.count(\"Stone\") and is_on_floor():
+			quicksave[\"position\"] = position
+	if collision_mask == 0:
+		collision_mask = 2
+	elif dictionary_names.count(\"Platform\"):
+		if is_on_floor() and Input.is_action_pressed(\"S\") and Input.is_action_just_pressed(\"SPACE\"):
+			collision_mask = 0
+			vel.y += 200
+
+	#Main action
+func _physics_process(delta):
+	if not Global.Pause:
+			###  Move
+		Move()
+			### Animation
+		if $AnimatedSprite.animation != anim:
+			$AnimatedSprite.play(anim)
+			### Gravity and Move realized
+		vel.y += gravity
+		vel = move_and_slide(vel, Vector2.UP)
+		contact_surface()
+"
+
+[sub_resource type="AtlasTexture" id=17]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 0, 0, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=18]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 64, 0, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=19]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 128, 0, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=20]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 192, 0, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=27]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 384, 320, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=32]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 320, 320, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=33]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 256, 320, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=31]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 448, 320, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=28]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 128, 64, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=29]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 192, 64, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=30]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 256, 64, 64, 64 )
+
+[sub_resource type="SpriteFrames" id=15]
+animations = [ {
+"frames": [ SubResource( 17 ), SubResource( 18 ), SubResource( 19 ), SubResource( 20 ) ],
+"loop": true,
+"name": "idle",
+"speed": 5.0
+}, {
+"frames": [ SubResource( 27 ) ],
+"loop": false,
+"name": "jump",
+"speed": 0.0
+}, {
+"frames": [ SubResource( 32 ), SubResource( 33 ), SubResource( 31 ) ],
+"loop": false,
+"name": "fall",
+"speed": 10.0
+}, {
+"frames": [ SubResource( 28 ), SubResource( 29 ), SubResource( 30 ) ],
+"loop": true,
+"name": "walk",
+"speed": 5.0
+} ]
+
+[node name="Monster" type="KinematicBody2D"]
+collision_mask = 2
+script = SubResource( 16 )
+
+[node name="AnimatedSprite" type="AnimatedSprite" parent="."]
+frames = SubResource( 15 )
+animation = "idle"
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+rotation = 8.74228e-08
+polygon = PoolVector2Array( -13, 11, -7, 22, 9, 22, 9, 14, 9, 6, 4, -2, -6, -2 )
+
+[node name="Camera2D" type="Camera2D" parent="."]
+current = true
+limit_left = -2000
+limit_top = -1000
+limit_right = 10000
+limit_bottom = 3000

@@ -1,0 +1,1 @@
+{"New Game": "New Game", "Loading" : "Loading", "Options": "Options", "Exit":"Exit", "Smile": "Smile",  "Save":"Save", "Back": "Back"}

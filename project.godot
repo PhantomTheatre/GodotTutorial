@@ -17,7 +17,7 @@ config/icon="res://Sprites/icon.png"
 [autoload]
 
 Global="*res://Global.gd"
-Saver="*res://Scenes/Saver.tscn"
+Saver="*res://Saver.gd"
 
 [display]
 

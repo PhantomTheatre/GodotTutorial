@@ -1,9 +1,10 @@
 [gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://Sprites/widelands.png" type="Texture" id=1]
-[ext_resource path="res://Readiculous.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://Fonts/Readiculous.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://Sprites/icon.png" type="Texture" id=3]
 [ext_resource path="res://Sprites/naturew.jpg" type="Texture" id=4]
+[ext_resource path="res://Fonts/ReadiculousEng.tres" type="DynamicFont" id=5]
 
 [sub_resource type="GDScript" id=2]
 script/source = "extends Control
@@ -14,7 +15,9 @@ var focus
 
 func _ready():
 	$VBoxContainer/HBoxContainer/VBoxContainer/NewGame.grab_focus()
+	ChangeLanguages()
 	DetectedFocus()
+	#Saver.convertering(\"res://Saves/Languages/ZExemplesRus.txt\")
 func _process(delta):
 	Focus()
 
@@ -61,14 +64,33 @@ func _on_Loading_pressed():
 	dirsave.list_dir_begin(true, false)
 	var file_name = dirsave.get_next()
 	var loadscene = load(\"res://Scenes/Save.tscn\")
-	var scene =  loadscene.instance()
+	var scene
 	while file_name != \"\":
-		$Loading/Scroll/VBoxContainer.add_child(scene)
-		scene =  loadscene.instance()
-		file_name = dirsave.get_next()
-		$Loading/Scroll/VBoxContainer.rect_min_size.y += 100
-		print($Loading/Scroll/VBoxContainer.get_children())
+		if file_name.get_extension ( ) == \"json\":
+			scene =  loadscene.instance()
+			$Loading/Scroll/VBoxContainer.add_child(scene)
+			file_name = dirsave.get_next()
+			$Loading/Scroll/VBoxContainer.rect_min_size.y += 100
+		else: file_name = dirsave.get_next() 
 	$Loading.show()
+		
+	###Change Languages
+func ChangeLanguages():
+	Saver.loading(\"Languages\")
+	var font = DynamicFont.new()
+	if Saver.saved_info[\"selectedlanguage\"] == \"English\":
+		font = load(\"res://Fonts/ReadiculousEng.tres\")
+	elif Saver.saved_info[\"selectedlanguage\"] == \"Russian\":
+		font = load(\"res://Fonts/CataneoRus.tres\")
+	for label in get_tree().get_nodes_in_group(\"Labels\"):
+		label.add_font_override(\"font\", font)
+	$VBoxContainer/HBoxContainer/VBoxContainer/NewGame/Label.text = Saver.language[\"New Game\"]
+	$VBoxContainer/HBoxContainer/VBoxContainer/Loading/Label.text = Saver.language[\"Loading\"]
+	$VBoxContainer/HBoxContainer/VBoxContainer/Options/Label.text = Saver.language[\"Options\"]
+	$VBoxContainer/HBoxContainer/VBoxContainer/Exit/Label.text    = Saver.language[\"Exit\"]
+	$Options/Speaker1/Smile/Label.text = Saver.language[\"Smile\"]
+	$Options/Speaker2/Save/Label.text  = Saver.language[\"Save\"]
+	$Loading/Back/Label.text =           Saver.language[\"Back\"]
 		
 func DetectedFocus():
 	for button in get_tree().get_nodes_in_group(\"Buttons\"):
@@ -84,35 +106,24 @@ func Focus():
 		DetectedFocus()
 
 	###MouseFocus
-func _on_NewGame_mouse_entered():
-	$VBoxContainer/HBoxContainer/VBoxContainer/NewGame.grab_focus()
-func _on_Loading_mouse_entered():
-	$VBoxContainer/HBoxContainer/VBoxContainer/Loading.grab_focus()
-func _on_Options_mouse_entered():
-	$VBoxContainer/HBoxContainer/VBoxContainer/Options.grab_focus()
-func _on_Exit_mouse_entered():
-	$VBoxContainer/HBoxContainer/VBoxContainer/Exit.grab_focus()
-func _on_Smile_mouse_entered():
-	$Options/Speaker1/Smile.grab_focus()
-func _on_Save_mouse_entered():
-	$Options/Speaker2/Save.grab_focus()
-func _on_Back_mouse_entered():
-	$Loading/Back.grab_focus()
+func _on_NewGame_mouse_entered(): $VBoxContainer/HBoxContainer/VBoxContainer/NewGame.grab_focus()
+func _on_Loading_mouse_entered(): $VBoxContainer/HBoxContainer/VBoxContainer/Loading.grab_focus()
+func _on_Options_mouse_entered(): $VBoxContainer/HBoxContainer/VBoxContainer/Options.grab_focus()
+func _on_Exit_mouse_entered():    $VBoxContainer/HBoxContainer/VBoxContainer/Exit.grab_focus()
+func _on_Smile_mouse_entered():   $Options/Speaker1/Smile.grab_focus()
+func _on_Save_mouse_entered():    $Options/Speaker2/Save.grab_focus()
+func _on_Back_mouse_entered():    $Loading/Back.grab_focus()
 
 
 	### Options
 func _on_Smile_toggled(button_pressed):
 	var pathto = $VBoxContainer/HBoxContainer/VBoxContainer/NewGame/Label
 	if button_pressed == false:
-		pathto.text = (pathto.text).substr(0,9)
+		pathto.text = (pathto.text).substr(0,(pathto.text).length() - 3)
 	else: pathto.text += \" :)\"
 "
 
 [sub_resource type="StyleBoxEmpty" id=4]
-
-[sub_resource type="DynamicFont" id=1]
-size = 32
-font_data = ExtResource( 2 )
 
 [sub_resource type="StyleBoxEmpty" id=5]
 
@@ -192,7 +203,7 @@ size_flags_stretch_ratio = 0.2
 custom_styles/focus = SubResource( 4 )
 flat = true
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer/NewGame" groups=["Labels"]]
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer/NewGame" groups=["Labels", "MenuLabels"]]
 margin_left = 15.0
 margin_bottom = 14.0
 size_flags_stretch_ratio = 0.2
@@ -200,7 +211,7 @@ custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
 custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
 custom_constants/shadow_offset_x = 3
 custom_constants/shadow_offset_y = -3
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = ExtResource( 5 )
 text = "New Game! :)"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -228,7 +239,7 @@ custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
 custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
 custom_constants/shadow_offset_x = 3
 custom_constants/shadow_offset_y = -3
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = ExtResource( 5 )
 text = "Loading"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -252,7 +263,7 @@ custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
 custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
 custom_constants/shadow_offset_x = 3
 custom_constants/shadow_offset_y = -3
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = ExtResource( 5 )
 text = "Options"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -277,7 +288,7 @@ custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
 custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
 custom_constants/shadow_offset_x = 3
 custom_constants/shadow_offset_y = -3
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = ExtResource( 5 )
 text = "Exit"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -347,9 +358,8 @@ focus_neighbour_bottom = NodePath("../../Speaker2/Save")
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme = SubResource( 10 )
-pressed = true
 
-[node name="Label" type="Label" parent="Options/Speaker1/Smile" groups=["Labels"]]
+[node name="Label" type="Label" parent="Options/Speaker1/Smile" groups=["Labels", "MenuLabels"]]
 margin_left = 30.0
 margin_right = 117.0
 margin_bottom = 55.0
@@ -358,7 +368,7 @@ custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
 custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
 custom_constants/shadow_offset_x = 3
 custom_constants/shadow_offset_y = -3
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = ExtResource( 5 )
 text = "Smile"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -395,7 +405,7 @@ size_flags_vertical = 3
 custom_styles/focus = SubResource( 4 )
 flat = true
 
-[node name="Label" type="Label" parent="Options/Speaker2/Save" groups=["Labels"]]
+[node name="Label" type="Label" parent="Options/Speaker2/Save" groups=["Labels", "MenuLabels"]]
 margin_left = 15.0
 margin_right = 272.0
 margin_bottom = 55.0
@@ -404,7 +414,7 @@ custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
 custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
 custom_constants/shadow_offset_x = 3
 custom_constants/shadow_offset_y = -3
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = ExtResource( 5 )
 text = "Save"
 align = 1
 __meta__ = {
@@ -452,7 +462,7 @@ size_flags_stretch_ratio = 0.15
 custom_styles/focus = SubResource( 4 )
 flat = true
 
-[node name="Label" type="Label" parent="Loading/Back" groups=["Labels"]]
+[node name="Label" type="Label" parent="Loading/Back" groups=["Labels", "MenuLabels"]]
 margin_left = 15.0
 margin_right = 548.0
 margin_bottom = 55.0
@@ -461,7 +471,7 @@ custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
 custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
 custom_constants/shadow_offset_x = 3
 custom_constants/shadow_offset_y = -3
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = ExtResource( 5 )
 text = "Back"
 align = 2
 __meta__ = {

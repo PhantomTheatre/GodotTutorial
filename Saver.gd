@@ -6,7 +6,7 @@ var saved_info = {
 	#Game Info
 	"level": "",
 	#Settings Info
-	"selectedlanguage" : "Russian",
+	"selectedlanguage" : "English",
 	"smile": ""
 	}
 var language = {}

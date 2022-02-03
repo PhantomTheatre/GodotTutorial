@@ -1,61 +1,37 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://Sprites/widelands.png" type="Texture" id=1]
 [ext_resource path="res://Fonts/Readiculous.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://Sprites/icon.png" type="Texture" id=3]
 [ext_resource path="res://Sprites/naturew.jpg" type="Texture" id=4]
 [ext_resource path="res://Fonts/ReadiculousEng.tres" type="DynamicFont" id=5]
+[ext_resource path="res://Scenes/Button.tscn" type="PackedScene" id=6]
 
-[sub_resource type="GDScript" id=2]
+[sub_resource type="GDScript" id=11]
 script/source = "extends Control
-
 onready var paper = load(\"res://Sprites/paper.jpg\")
 onready var icon = load(\"res://Sprites/icon.png\")
-var focus
 
 func _ready():
-	$VBoxContainer/HBoxContainer/VBoxContainer/NewGame.grab_focus()
-	ChangeLanguages()
-	DetectedFocus()
-	#Saver.convertering(\"res://Saves/Languages/ZExemplesRus.txt\")
-func _process(delta):
-	Focus()
-
-func _on_NewGame_pressed():
+	pass
+	#Saver.convertering(\"res://Saves/Languages/ZExemplesEng.txt\")
+	
+func NewGame_pressed():
 	get_tree().change_scene(\"res://Scenes/Main.tscn\")
-func _on_Exit_pressed():
+func Exit_pressed():
 	get_tree().quit()
 	
-	###OptionsWindow
-func _on_Options_pressed():
-	SelectedMenu()
+func Settings_pressed():
 	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = paper
 	$Options/Speaker1/Smile.grab_focus()
 	$Options.show()
-func _on_Save_pressed():
 	SelectedMenu()
+func Save_pressed():
 	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = icon
-	$VBoxContainer/HBoxContainer/VBoxContainer/Options.grab_focus()
 	$Options.hide()
-	
-	###LoadingButtons
-func _on_Back_pressed():
 	SelectedMenu()
-	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = icon
-	$VBoxContainer/HBoxContainer/VBoxContainer/Loading.grab_focus()
-	$Loading.hide()
-	for child in $Loading/Scroll/VBoxContainer.get_children():
-		child.queue_free()
-		
-	###Menu focus on/off
-func SelectedMenu():
-	for button in get_tree().get_nodes_in_group(\"MenuButtons\"):
-		button.disabled = not button.disabled
-		if button.focus_mode == FOCUS_NONE: button.focus_mode = FOCUS_ALL
-		else: button.focus_mode = FOCUS_NONE
-		
-		
-func _on_Loading_pressed():
+	
+func Loading_pressed():
 	SelectedMenu()
 	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = paper
 	$Loading/Back.grab_focus()
@@ -73,67 +49,21 @@ func _on_Loading_pressed():
 			$Loading/Scroll/VBoxContainer.rect_min_size.y += 100
 		else: file_name = dirsave.get_next() 
 	$Loading.show()
-		
-	###Change Languages
-func ChangeLanguages():
-	Saver.loading(\"Languages\")
-	var font = DynamicFont.new()
-	if Saver.saved_info[\"selectedlanguage\"] == \"English\":
-		font = load(\"res://Fonts/ReadiculousEng.tres\")
-	elif Saver.saved_info[\"selectedlanguage\"] == \"Russian\":
-		font = load(\"res://Fonts/CataneoRus.tres\")
-	for label in get_tree().get_nodes_in_group(\"Labels\"):
-		label.add_font_override(\"font\", font)
-	$VBoxContainer/HBoxContainer/VBoxContainer/NewGame/Label.text = Saver.language[\"New Game\"]
-	$VBoxContainer/HBoxContainer/VBoxContainer/Loading/Label.text = Saver.language[\"Loading\"]
-	$VBoxContainer/HBoxContainer/VBoxContainer/Options/Label.text = Saver.language[\"Options\"]
-	$VBoxContainer/HBoxContainer/VBoxContainer/Exit/Label.text    = Saver.language[\"Exit\"]
-	$Options/Speaker1/Smile/Label.text = Saver.language[\"Smile\"]
-	$Options/Speaker2/Save/Label.text  = Saver.language[\"Save\"]
-	$Loading/Back/Label.text =           Saver.language[\"Back\"]
-		
-func DetectedFocus():
-	for button in get_tree().get_nodes_in_group(\"Buttons\"):
-		if button == get_focus_owner():
-			focus = button
-			for label in get_tree().get_nodes_in_group(\"Labels\"):
-				if str(button.get_path()) + \"/Label\" == str(label.get_path()):
-					label.text = \"> \" + label.text
-				elif label.text[0] == \">\":
-					label.text = (label.text).substr(2, (label.text).length())
-func Focus():
-	if focus != get_focus_owner():
-		DetectedFocus()
+func Back_pressed():
+	SelectedMenu()
+	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = icon
+	$VBoxContainer/HBoxContainer/VBoxContainer/Loading.grab_focus()
+	$Loading.hide()
+	for child in $Loading/Scroll/VBoxContainer.get_children():
+		child.queue_free()
+	
+func SelectedMenu():
+	for button in get_tree().get_nodes_in_group(\"MenuB\"):
+		button.disabled = not button.disabled
+		if button.focus_mode == FOCUS_NONE: button.focus_mode = FOCUS_ALL
+		else: button.focus_mode = FOCUS_NONE
 
-	###MouseFocus
-func _on_NewGame_mouse_entered(): $VBoxContainer/HBoxContainer/VBoxContainer/NewGame.grab_focus()
-func _on_Loading_mouse_entered(): $VBoxContainer/HBoxContainer/VBoxContainer/Loading.grab_focus()
-func _on_Options_mouse_entered(): $VBoxContainer/HBoxContainer/VBoxContainer/Options.grab_focus()
-func _on_Exit_mouse_entered():    $VBoxContainer/HBoxContainer/VBoxContainer/Exit.grab_focus()
-func _on_Smile_mouse_entered():   $Options/Speaker1/Smile.grab_focus()
-func _on_Save_mouse_entered():    $Options/Speaker2/Save.grab_focus()
-func _on_Back_mouse_entered():    $Loading/Back.grab_focus()
-
-
-	### Options
-func _on_Smile_toggled(button_pressed):
-	var pathto = $VBoxContainer/HBoxContainer/VBoxContainer/NewGame/Label
-	if button_pressed == false:
-		pathto.text = (pathto.text).substr(0,(pathto.text).length() - 3)
-	else: pathto.text += \" :)\"
 "
-
-[sub_resource type="StyleBoxEmpty" id=4]
-
-[sub_resource type="StyleBoxEmpty" id=5]
-
-[sub_resource type="Theme" id=6]
-Button/styles/focus = SubResource( 5 )
-
-[sub_resource type="StyleBoxEmpty" id=7]
-
-[sub_resource type="Theme" id=8]
-Button/styles/focus = SubResource( 7 )
 
 [sub_resource type="DynamicFont" id=3]
 size = 20
@@ -148,7 +78,7 @@ CheckBox/styles/focus = SubResource( 9 )
 [node name="Control" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = SubResource( 2 )
+script = SubResource( 11 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -192,107 +122,48 @@ rect_pivot_offset = Vector2( -457, -60 )
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.35
 
-[node name="NewGame" type="Button" parent="VBoxContainer/HBoxContainer/VBoxContainer" groups=["Buttons", "MenuButtons"]]
+[node name="Newgame" parent="VBoxContainer/HBoxContainer/VBoxContainer" instance=ExtResource( 6 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_right = 243.0
 margin_bottom = 46.0
-rect_pivot_offset = Vector2( -744, 21 )
 focus_neighbour_top = NodePath("../Exit")
-size_flags_horizontal = 3
-size_flags_vertical = 3
+focus_neighbour_bottom = NodePath("../Loading")
 size_flags_stretch_ratio = 0.2
-custom_styles/focus = SubResource( 4 )
-flat = true
+groups = [ "Label", "MenuB" ]
+text = "New Game"
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer/NewGame" groups=["Labels", "MenuLabels"]]
-margin_left = 15.0
-margin_bottom = 14.0
-size_flags_stretch_ratio = 0.2
-custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
-custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
-custom_constants/shadow_offset_x = 3
-custom_constants/shadow_offset_y = -3
-custom_fonts/font = ExtResource( 5 )
-text = "New Game! :)"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Loading" type="Button" parent="VBoxContainer/HBoxContainer/VBoxContainer" groups=["Buttons", "MenuButtons"]]
+[node name="Loading" parent="VBoxContainer/HBoxContainer/VBoxContainer" instance=ExtResource( 6 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_top = 50.0
 margin_right = 243.0
 margin_bottom = 96.0
-rect_pivot_offset = Vector2( -744, 21 )
-size_flags_horizontal = 3
-size_flags_vertical = 3
 size_flags_stretch_ratio = 0.2
-custom_styles/focus = SubResource( 4 )
-flat = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer/Loading" groups=["Labels", "MenuLabels"]]
-margin_left = 15.0
-margin_bottom = 14.0
-size_flags_stretch_ratio = 0.2
-custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
-custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
-custom_constants/shadow_offset_x = 3
-custom_constants/shadow_offset_y = -3
-custom_fonts/font = ExtResource( 5 )
+groups = [ "Label", "MenuB" ]
 text = "Loading"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="Options" type="Button" parent="VBoxContainer/HBoxContainer/VBoxContainer" groups=["Buttons", "MenuButtons"]]
+[node name="Settings" parent="VBoxContainer/HBoxContainer/VBoxContainer" instance=ExtResource( 6 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_top = 100.0
 margin_right = 243.0
 margin_bottom = 147.0
-rect_pivot_offset = Vector2( -744, 21 )
-size_flags_horizontal = 3
-size_flags_vertical = 3
 size_flags_stretch_ratio = 0.2
-theme = SubResource( 6 )
-flat = true
+groups = [ "Label", "MenuB" ]
+text = "Settings"
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer/Options" groups=["Labels", "MenuLabels"]]
-margin_left = 15.0
-margin_bottom = 14.0
-custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
-custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
-custom_constants/shadow_offset_x = 3
-custom_constants/shadow_offset_y = -3
-custom_fonts/font = ExtResource( 5 )
-text = "Options"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Exit" type="Button" parent="VBoxContainer/HBoxContainer/VBoxContainer" groups=["Buttons", "MenuButtons"]]
+[node name="Exit" parent="VBoxContainer/HBoxContainer/VBoxContainer" instance=ExtResource( 6 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_top = 151.0
 margin_right = 243.0
 margin_bottom = 197.0
-rect_pivot_offset = Vector2( -744, 21 )
-focus_neighbour_bottom = NodePath("../NewGame")
-size_flags_horizontal = 3
-size_flags_vertical = 3
+focus_neighbour_top = NodePath("../Settings")
+focus_neighbour_bottom = NodePath("../Newgame")
 size_flags_stretch_ratio = 0.2
-theme = SubResource( 8 )
-flat = true
-
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer/Exit" groups=["Labels", "MenuLabels"]]
-margin_left = 15.0
-margin_bottom = 14.0
-custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
-custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
-custom_constants/shadow_offset_x = 3
-custom_constants/shadow_offset_y = -3
-custom_fonts/font = ExtResource( 5 )
+groups = [ "Label", "MenuB" ]
 text = "Exit"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Version" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
 margin_top = 201.0
@@ -353,13 +224,11 @@ __meta__ = {
 [node name="Smile" type="CheckBox" parent="Options/Speaker1" groups=["Buttons"]]
 margin_right = 280.0
 margin_bottom = 60.0
-focus_neighbour_top = NodePath("../../Speaker2/Save")
-focus_neighbour_bottom = NodePath("../../Speaker2/Save")
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme = SubResource( 10 )
 
-[node name="Label" type="Label" parent="Options/Speaker1/Smile" groups=["Labels", "MenuLabels"]]
+[node name="Label" type="Label" parent="Options/Speaker1/Smile" groups=["Label", "MenuLabels"]]
 margin_left = 30.0
 margin_right = 117.0
 margin_bottom = 55.0
@@ -393,33 +262,8 @@ margin_bottom = 304.0
 size_flags_vertical = 3
 size_flags_stretch_ratio = 5.0
 
-[node name="Save" type="Button" parent="Options/Speaker2" groups=["Buttons"]]
-margin_top = 308.0
-margin_right = 280.0
-margin_bottom = 369.0
-rect_pivot_offset = Vector2( -744, 21 )
-focus_neighbour_top = NodePath("../../Speaker1/Smile")
-focus_neighbour_bottom = NodePath("../../Speaker1/Smile")
-size_flags_horizontal = 3
-size_flags_vertical = 3
-custom_styles/focus = SubResource( 4 )
-flat = true
-
-[node name="Label" type="Label" parent="Options/Speaker2/Save" groups=["Labels", "MenuLabels"]]
-margin_left = 15.0
-margin_right = 272.0
-margin_bottom = 55.0
-size_flags_stretch_ratio = 0.2
-custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
-custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
-custom_constants/shadow_offset_x = 3
-custom_constants/shadow_offset_y = -3
-custom_fonts/font = ExtResource( 5 )
+[node name="Save" parent="Options/Speaker2" instance=ExtResource( 6 )]
 text = "Save"
-align = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Loading" type="VBoxContainer" parent="."]
 visible = false
@@ -449,46 +293,10 @@ margin_bottom = 100.0
 rect_min_size = Vector2( 0, 100 )
 custom_constants/separation = 100
 
-[node name="Back" type="Button" parent="Loading" groups=["Buttons"]]
-margin_top = 322.0
-margin_right = 564.0
-margin_bottom = 370.0
-rect_pivot_offset = Vector2( -744, 21 )
-focus_neighbour_top = NodePath("../../Speaker1/Smile")
-focus_neighbour_bottom = NodePath("../../Speaker1/Smile")
-size_flags_horizontal = 3
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.15
-custom_styles/focus = SubResource( 4 )
-flat = true
-
-[node name="Label" type="Label" parent="Loading/Back" groups=["Labels", "MenuLabels"]]
-margin_left = 15.0
-margin_right = 548.0
-margin_bottom = 55.0
-size_flags_stretch_ratio = 0.2
-custom_colors/font_color = Color( 0.286275, 0, 0.403922, 1 )
-custom_colors/font_color_shadow = Color( 0.717647, 0.411765, 1, 1 )
-custom_constants/shadow_offset_x = 3
-custom_constants/shadow_offset_y = -3
-custom_fonts/font = ExtResource( 5 )
+[node name="Back" parent="Loading" instance=ExtResource( 6 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_bottom = 318.0
 text = "Back"
-align = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[connection signal="mouse_entered" from="VBoxContainer/HBoxContainer/VBoxContainer/NewGame" to="." method="_on_NewGame_mouse_entered"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/VBoxContainer/NewGame" to="." method="_on_NewGame_pressed"]
-[connection signal="mouse_entered" from="VBoxContainer/HBoxContainer/VBoxContainer/Loading" to="." method="_on_Loading_mouse_entered"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/VBoxContainer/Loading" to="." method="_on_Loading_pressed"]
-[connection signal="mouse_entered" from="VBoxContainer/HBoxContainer/VBoxContainer/Options" to="." method="_on_Options_mouse_entered"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/VBoxContainer/Options" to="." method="_on_Options_pressed"]
-[connection signal="mouse_entered" from="VBoxContainer/HBoxContainer/VBoxContainer/Exit" to="." method="_on_Exit_mouse_entered"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/VBoxContainer/Exit" to="." method="_on_Exit_pressed"]
 [connection signal="mouse_entered" from="Options/Speaker1/Smile" to="." method="_on_Smile_mouse_entered"]
-[connection signal="toggled" from="Options/Speaker1/Smile" to="." method="_on_Smile_toggled"]
-[connection signal="mouse_entered" from="Options/Speaker2/Save" to="." method="_on_Save_mouse_entered"]
-[connection signal="pressed" from="Options/Speaker2/Save" to="." method="_on_Save_pressed"]
-[connection signal="mouse_entered" from="Loading/Back" to="." method="_on_Back_mouse_entered"]
-[connection signal="pressed" from="Loading/Back" to="." method="_on_Back_pressed"]

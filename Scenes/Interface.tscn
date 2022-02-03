@@ -4,7 +4,6 @@
 [ext_resource path="res://Fonts/Readiculous.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://Sprites/paper.jpg" type="Texture" id=3]
 
-
 [sub_resource type="GDScript" id=3]
 script/source = "extends Control
 onready var Global = get_node(\"/root/Global\")
@@ -12,6 +11,7 @@ onready var Global = get_node(\"/root/Global\")
 var focus
 
 func _ready():
+	ChangeLanguages()
 	$Buttons/Continue.grab_focus()
 	DetectedFocus()
 func _process(delta):
@@ -23,12 +23,24 @@ func DetectedFocus():
 			focus = button
 			for label in get_tree().get_nodes_in_group(\"Labels\"):
 				if str(button.get_path()) + \"/Label\" == str(label.get_path()):
-					label.text = \"> \" + label.text
+					label.text[0] = \">\"
 				elif label.text[0] == \">\":
-					label.text = (label.text).substr(2, (label.text).length())
+					label.text[0] = \" \"
 func Focus():
 	if focus != get_focus_owner():
 		DetectedFocus()
+		
+func ChangeLanguages():
+	Saver.loading(\"Languages\")
+	var font = DynamicFont.new()
+	if Saver.saved_info[\"selectedlanguage\"] == \"English\":
+		font = load(\"res://Fonts/ReadiculousEng.tres\")
+	elif Saver.saved_info[\"selectedlanguage\"] == \"Russian\":
+		font = load(\"res://Fonts/CataneoRus.tres\")
+	for label in get_tree().get_nodes_in_group(\"Labels\"):
+		label.add_font_override(\"font\", font)
+	$Buttons/Continue/Label.text = Saver.language[\"Continue\"]
+	$Buttons/ToMenu/Label.text = Saver.language[\"ToMenu\"]
 
 func _on_Continue_mouse_entered():
 	$Buttons/Continue.grab_focus()

@@ -31,6 +31,7 @@ func Save_pressed():
 	$Options.hide()
 	SelectedMenu()
 	
+	
 func Loading_pressed():
 	SelectedMenu()
 	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = paper
@@ -45,9 +46,11 @@ func Loading_pressed():
 		if file_name.get_extension ( ) == \"json\":
 			scene =  loadscene.instance()
 			$Loading/Scroll/VBoxContainer.add_child(scene)
+			$Loading/Scroll/VBoxContainer/Save.name_of_save = file_name.get_basename()
+			$Loading/Scroll/VBoxContainer/Save.name = file_name.get_basename()
 			file_name = dirsave.get_next()
 			$Loading/Scroll/VBoxContainer.rect_min_size.y += 100
-		else: file_name = dirsave.get_next() 
+		else: file_name = dirsave.get_next()
 	$Loading.show()
 func Back_pressed():
 	SelectedMenu()
@@ -130,7 +133,7 @@ margin_bottom = 46.0
 focus_neighbour_top = NodePath("../Exit")
 focus_neighbour_bottom = NodePath("../Loading")
 size_flags_stretch_ratio = 0.2
-groups = [ "Label", "MenuB" ]
+groups = [ "MenuB" ]
 text = "New Game"
 
 [node name="Loading" parent="VBoxContainer/HBoxContainer/VBoxContainer" instance=ExtResource( 6 )]
@@ -140,7 +143,7 @@ margin_top = 50.0
 margin_right = 243.0
 margin_bottom = 96.0
 size_flags_stretch_ratio = 0.2
-groups = [ "Label", "MenuB" ]
+groups = [ "MenuB" ]
 text = "Loading"
 
 [node name="Settings" parent="VBoxContainer/HBoxContainer/VBoxContainer" instance=ExtResource( 6 )]
@@ -150,7 +153,7 @@ margin_top = 100.0
 margin_right = 243.0
 margin_bottom = 147.0
 size_flags_stretch_ratio = 0.2
-groups = [ "Label", "MenuB" ]
+groups = [ "MenuB" ]
 text = "Settings"
 
 [node name="Exit" parent="VBoxContainer/HBoxContainer/VBoxContainer" instance=ExtResource( 6 )]
@@ -162,7 +165,7 @@ margin_bottom = 197.0
 focus_neighbour_top = NodePath("../Settings")
 focus_neighbour_bottom = NodePath("../Newgame")
 size_flags_stretch_ratio = 0.2
-groups = [ "Label", "MenuB" ]
+groups = [ "MenuB" ]
 text = "Exit"
 
 [node name="Version" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
@@ -279,9 +282,10 @@ __meta__ = {
 
 [node name="Scroll" type="ScrollContainer" parent="Loading"]
 margin_right = 564.0
-margin_bottom = 318.0
+margin_bottom = 303.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+size_flags_stretch_ratio = 4.86
 follow_focus = true
 scroll_horizontal_enabled = false
 __meta__ = {
@@ -296,7 +300,9 @@ custom_constants/separation = 100
 [node name="Back" parent="Loading" instance=ExtResource( 6 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_bottom = 318.0
+margin_top = 307.0
+margin_right = 564.0
+margin_bottom = 370.0
 text = "Back"
 
 [connection signal="mouse_entered" from="Options/Speaker1/Smile" to="." method="_on_Smile_mouse_entered"]

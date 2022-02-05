@@ -2,33 +2,37 @@ extends Node
 
 var PathToFile
 
-var saved_info = {
-	#Game Info
+var game_info = {
 	"level": "",
-	#Settings Info
+	"x": "0",
+	}
+var settings_info = {
 	"selectedlanguage" : "English",
 	"smile": ""
 	}
 var language = {}
 
-func save():
+func Save_Game(Name = "Empty"):
 	var file = File.new()
-	file.open("res://Saves/" + Global.SelectedSave, File.WRITE)
-	file.store_string(to_json(saved_info))
+	file.open("res://Saves/" + Name + ".json", File.WRITE)
+	file.store_string(to_json(game_info))
 	file.close()
-
-func loading(view = "Game"):
+func Load_Game(Name):
 	var file = File.new()
-	if view == "Languages":  
-		PathToFile = ("res://Saves/Languages/" + saved_info["selectedlanguage"] + ".json")
-	elif view == "Game":
-		PathToFile = "res://Saves/" + Global.SelectedSave
+	PathToFile = "res://Saves/" + Global.SelectedSave + ".json"
 	file.open(PathToFile, File.READ)
 	var data = parse_json(file.get_as_text())
 	file.close()
 	if typeof(data) == TYPE_DICTIONARY:
-		if view == "Languages":   language = data
-		elif view == "Game":      saved_info = data
+		game_info = data
+func Load_Language():
+	var file = File.new()
+	PathToFile = ("res://Saves/Languages/" + settings_info["selectedlanguage"] + ".json")
+	file.open(PathToFile, File.READ)
+	var data = parse_json(file.get_as_text())
+	file.close()
+	if typeof(data) == TYPE_DICTIONARY:
+		game_info = data
 			
 func convertering(path):
 	var file = File.new()

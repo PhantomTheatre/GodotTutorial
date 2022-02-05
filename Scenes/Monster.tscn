@@ -149,20 +149,10 @@ flags = 4
 atlas = ExtResource( 1 )
 region = Rect2( 192, 0, 64, 64 )
 
-[sub_resource type="AtlasTexture" id=32]
+[sub_resource type="AtlasTexture" id=27]
 flags = 4
 atlas = ExtResource( 1 )
-region = Rect2( 320, 320, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=33]
-flags = 4
-atlas = ExtResource( 1 )
-region = Rect2( 256, 320, 64, 64 )
-
-[sub_resource type="AtlasTexture" id=31]
-flags = 4
-atlas = ExtResource( 1 )
-region = Rect2( 448, 320, 64, 64 )
+region = Rect2( 384, 320, 64, 64 )
 
 [sub_resource type="AtlasTexture" id=28]
 flags = 4
@@ -179,10 +169,20 @@ flags = 4
 atlas = ExtResource( 1 )
 region = Rect2( 256, 64, 64, 64 )
 
-[sub_resource type="AtlasTexture" id=27]
+[sub_resource type="AtlasTexture" id=32]
 flags = 4
 atlas = ExtResource( 1 )
-region = Rect2( 384, 320, 64, 64 )
+region = Rect2( 320, 320, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=33]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 256, 320, 64, 64 )
+
+[sub_resource type="AtlasTexture" id=31]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 448, 320, 64, 64 )
 
 [sub_resource type="SpriteFrames" id=15]
 animations = [ {
@@ -191,20 +191,20 @@ animations = [ {
 "name": "idle",
 "speed": 5.0
 }, {
-"frames": [ SubResource( 32 ), SubResource( 33 ), SubResource( 31 ) ],
+"frames": [ SubResource( 27 ) ],
 "loop": false,
-"name": "fall",
-"speed": 10.0
+"name": "jump",
+"speed": 0.0
 }, {
 "frames": [ SubResource( 28 ), SubResource( 29 ), SubResource( 30 ) ],
 "loop": true,
 "name": "walk",
 "speed": 5.0
 }, {
-"frames": [ SubResource( 27 ) ],
+"frames": [ SubResource( 32 ), SubResource( 33 ), SubResource( 31 ) ],
 "loop": false,
-"name": "jump",
-"speed": 0.0
+"name": "fall",
+"speed": 10.0
 } ]
 
 [node name="Monster" type="KinematicBody2D"]

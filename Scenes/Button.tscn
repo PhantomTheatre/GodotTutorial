@@ -11,17 +11,14 @@ var font
 signal pressed
 
 func _ready():
-	Saver.loading(\"Languages\")
+	Saver.Load_Language()
 	for i in groups:
-		if i == \"Label\":
-			$Button/Label.add_to_group(i)
-		else:
-			$Button.add_to_group(i)
+		$Button.add_to_group(i)
 	if (Saver.language).has(text):
 		var translated_text = Saver.language[text]
 		$Button/Label.text = \"  \" + str(translated_text)
 	else: $Button/Label.text = \"  \" + str(text)
-	if Saver.saved_info[\"selectedlanguage\"] == \"Russian\":
+	if Saver.settings_info[\"selectedlanguage\"] == \"Russian\":
 		font = load(\"res://Fonts/CataneoRus.tres\")
 	else:		###Saver.saved_info[\"selectedlanguage\"] == \"English\":
 		font = load(\"res://Fonts/ReadiculousEng.tres\")
@@ -56,7 +53,6 @@ script = SubResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-groups = [ "Label" ]
 text = "Text"
 
 [node name="Button" type="Button" parent="."]

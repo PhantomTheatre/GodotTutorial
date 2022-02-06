@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://Sprites/widelands.png" type="Texture" id=1]
 [ext_resource path="res://Fonts/Readiculous.ttf" type="DynamicFontData" id=2]
@@ -31,12 +31,12 @@ func Save_pressed():
 	$Options.hide()
 	SelectedMenu()
 	
-	
 func Loading_pressed():
 	SelectedMenu()
 	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = paper
 	$Loading/Back.grab_focus()
-	Saver.Clever_Load()
+	var sort = not $Loading/HBoxContainer/CheckButton.pressed
+	Saver.Sorted_Loading(sort)
 	var loadscene = load(\"res://Scenes/Save.tscn\")
 	if (Saver.sortfiles).size() > 0:
 		for i in Saver.sortfiles:
@@ -61,13 +61,22 @@ func Back_pressed():
 	for child in $Loading/Scroll/VBoxContainer.get_children():
 		child.queue_free()
 	$Loading/Scroll/VBoxContainer.rect_min_size.y = 100
+	#Button for change sorting
+func _on_CheckButton_pressed():
+	Back_pressed()
+	Loading_pressed()
+	#String for Searching Save by name
+func _on_LineEdit_text_changed(new_text):
+	for i in $Loading/Scroll/VBoxContainer.get_children():
+		i.show()
+		if i.name.countn(new_text) == 0 and new_text != \"\":
+			i.hide()
 	
 func SelectedMenu():
 	for button in get_tree().get_nodes_in_group(\"MenuB\"):
 		button.disabled = not button.disabled
 		if button.focus_mode == FOCUS_NONE: button.focus_mode = FOCUS_ALL
 		else: button.focus_mode = FOCUS_NONE
-
 "
 
 [sub_resource type="DynamicFont" id=3]
@@ -79,6 +88,11 @@ font_data = ExtResource( 2 )
 
 [sub_resource type="Theme" id=10]
 CheckBox/styles/focus = SubResource( 9 )
+
+[sub_resource type="StyleBoxEmpty" id=12]
+
+[sub_resource type="Theme" id=13]
+CheckButton/styles/focus = SubResource( 12 )
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -275,19 +289,41 @@ visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 380.0
-margin_top = 190.0
+margin_top = 156.0
 margin_right = -80.0
 margin_bottom = -40.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Scroll" type="ScrollContainer" parent="Loading"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Loading"]
 margin_right = 564.0
-margin_bottom = 303.0
+margin_bottom = 40.0
+
+[node name="LineEdit" type="LineEdit" parent="Loading/HBoxContainer"]
+margin_right = 327.0
+margin_bottom = 40.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.7
+
+[node name="CheckButton" type="CheckButton" parent="Loading/HBoxContainer"]
+margin_left = 395.0
+margin_right = 499.0
+margin_bottom = 40.0
+size_flags_horizontal = 6
+size_flags_stretch_ratio = 1.92
+theme = SubResource( 13 )
+text = "img"
+icon = ExtResource( 3 )
+expand_icon = true
+
+[node name="Scroll" type="ScrollContainer" parent="Loading"]
+margin_top = 44.0
+margin_right = 564.0
+margin_bottom = 340.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-size_flags_stretch_ratio = 4.86
+size_flags_stretch_ratio = 4.97
 follow_focus = true
 scroll_horizontal_enabled = false
 __meta__ = {
@@ -295,16 +331,20 @@ __meta__ = {
 }
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Loading/Scroll"]
+margin_right = 564.0
 margin_bottom = 100.0
 rect_min_size = Vector2( 0, 100 )
+size_flags_horizontal = 3
 custom_constants/separation = 100
 
 [node name="Back" parent="Loading" instance=ExtResource( 6 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 307.0
+margin_top = 344.0
 margin_right = 564.0
-margin_bottom = 370.0
+margin_bottom = 404.0
 text = "Back"
 
 [connection signal="mouse_entered" from="Options/Speaker1/Smile" to="." method="_on_Smile_mouse_entered"]
+[connection signal="text_changed" from="Loading/HBoxContainer/LineEdit" to="." method="_on_LineEdit_text_changed"]
+[connection signal="pressed" from="Loading/HBoxContainer/CheckButton" to="." method="_on_CheckButton_pressed"]

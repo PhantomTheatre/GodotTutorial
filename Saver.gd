@@ -22,7 +22,7 @@ func Save_Game(Name = "Empty"):
 	file.store_string(to_json(game_info))
 	file.close()
 
-func Clever_Load(PathToDir = "res://Saves/"):
+func Sorted_Loading(sort = true, PathToDir = "res://Saves/"):
 	var dirsave = Directory.new()
 	dirsave.open(PathToDir)
 	dirsave.list_dir_begin(true, false)
@@ -42,25 +42,29 @@ func Clever_Load(PathToDir = "res://Saves/"):
 		else: file_name = dirsave.get_next()
 	
 	#Sorting by date
-	var order = {"year" : 31536000, "month" : 2419200, "day" : 80000, "hour" : 3600, "minute" : 60, "second" : 1}	#Iteration order and number of seconds
-	var DiS = dates.duplicate(true)		#Dates in second; deep = True
-	for i in DiS:
-		for n in order:
-			i[n] = i[n] * order.get(n)
-		DiS[DiS.find(i)] = i["year"] + i["month"] + i["day"] + i["hour"] + i["minute"] + i["second"]
-	var minc = 0	#Competition for much little number
-	while files.size() > 0:
+	if sort == true:
+		var order = {"year" : 31536000, "month" : 2419200, "day" : 80000, "hour" : 3600, "minute" : 60, "second" : 1}	#Iteration order and number of seconds
+		var DiS = dates.duplicate(true)		#Dates in second; deep = True
 		for i in DiS:
-			if minc == 0 or i > minc:
-				minc = i
-		for i in DiS:
-			if i == minc:
-				sortdates.append(dates[DiS.find(i)])
-				sortfiles.append(files[DiS.find(i)])
-				dates.pop_at(DiS.find(i))
-				files.pop_at(DiS.find(i))
-				DiS.pop_at(DiS.find(i))
-				minc = 0
+			for n in order:
+				i[n] = i[n] * order.get(n)
+			DiS[DiS.find(i)] = i["year"] + i["month"] + i["day"] + i["hour"] + i["minute"] + i["second"]
+		var minc = 0	#Competition for much little number
+		while files.size() > 0:
+			for i in DiS:
+				if minc == 0 or i > minc:
+					minc = i
+			for i in DiS:
+				if i == minc:
+					sortdates.append(dates[DiS.find(i)])
+					sortfiles.append(files[DiS.find(i)])
+					dates.pop_at(DiS.find(i))
+					files.pop_at(DiS.find(i))
+					DiS.pop_at(DiS.find(i))
+					minc = 0
+	else: 
+		sortdates = dates
+		sortfiles = files
 			
 			
 func Load_Game(Name):

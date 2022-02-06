@@ -5,11 +5,15 @@
 [sub_resource type="GDScript" id=1]
 script/source = "extends Control
 
-export var x = \"\"
+export var datetime = 0
+
+export var x = 0
 export var name_of_save = \"\"
 
 func _on_Save_renamed():
 	$VBoxContainer/HBoxContainer2/Name.text = name_of_save
+	if typeof(datetime) == TYPE_DICTIONARY:
+		$VBoxContainer/HBoxContainer2/DateOfCreated.text = (str(datetime[\"day\"]) + \"/\" + str(datetime[\"month\"]) + \"/\" + str(datetime[\"year\"]) + \"  \" + str(datetime[\"hour\"]) + \":\" + str(datetime[\"minute\"]))
 "
 
 [sub_resource type="DynamicFont" id=2]
@@ -54,7 +58,7 @@ custom_constants/shadow_offset_y = 3
 custom_fonts/font = SubResource( 2 )
 text = "Name of Save"
 
-[node name="Stats" type="Label" parent="VBoxContainer/HBoxContainer2"]
+[node name="DateOfCreated" type="Label" parent="VBoxContainer/HBoxContainer2"]
 margin_left = 284.0
 margin_right = 564.0
 margin_bottom = 52.0
@@ -66,7 +70,7 @@ custom_colors/font_color_shadow = Color( 0.294118, 0.635294, 0.737255, 1 )
 custom_constants/shadow_offset_x = 3
 custom_constants/shadow_offset_y = 3
 custom_fonts/font = SubResource( 3 )
-text = "   Life:    Level:"
+text = " Date:"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 margin_top = 56.0

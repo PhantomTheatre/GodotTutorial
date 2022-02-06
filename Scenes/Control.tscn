@@ -36,21 +36,22 @@ func Loading_pressed():
 	SelectedMenu()
 	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = paper
 	$Loading/Back.grab_focus()
-	var dirsave = Directory.new()
-	dirsave.open(\"res://Saves/\")
-	dirsave.list_dir_begin(true, false)
-	var file_name = dirsave.get_next()
+	Saver.Clever_Load()
 	var loadscene = load(\"res://Scenes/Save.tscn\")
-	var scene
-	while file_name != \"\":
-		if file_name.get_extension ( ) == \"json\":
-			scene =  loadscene.instance()
+	if (Saver.sortfiles).size() > 0:
+		for i in Saver.sortfiles:
+			#Creating
+			var scene =  loadscene.instance()
 			$Loading/Scroll/VBoxContainer.add_child(scene)
-			$Loading/Scroll/VBoxContainer/Save.name_of_save = file_name.get_basename()
-			$Loading/Scroll/VBoxContainer/Save.name = file_name.get_basename()
-			file_name = dirsave.get_next()
-			$Loading/Scroll/VBoxContainer.rect_min_size.y += 100
-		else: file_name = dirsave.get_next()
+			#Data transfer
+			$Loading/Scroll/VBoxContainer/Save.name_of_save = i.get_basename()
+			$Loading/Scroll/VBoxContainer/Save.datetime = Saver.sortdates[Saver.sortfiles.find(i)]
+			#call save for starting change labels text
+			$Loading/Scroll/VBoxContainer/Save.name = i.get_basename()
+			#Increasing the scroll area
+			$Loading/Scroll/VBoxContainer.rect_min_size.y += 80
+	Saver.sortfiles = []
+	Saver.sortdates = []
 	$Loading.show()
 func Back_pressed():
 	SelectedMenu()
@@ -59,6 +60,7 @@ func Back_pressed():
 	$Loading.hide()
 	for child in $Loading/Scroll/VBoxContainer.get_children():
 		child.queue_free()
+	$Loading/Scroll/VBoxContainer.rect_min_size.y = 100
 	
 func SelectedMenu():
 	for button in get_tree().get_nodes_in_group(\"MenuB\"):

@@ -29,7 +29,8 @@ func _ready():
 			text_without_space += i
 	self.connect(\"pressed\", get_node(control), text_without_space + \"_pressed\")
 func _on_Button_mouse_entered():
-	$Button.grab_focus()
+	if $Button.focus_mode:
+		$Button.grab_focus()
 
 func _on_Button_focus_entered():
 	$Button/Label.text[0] = \"-\"

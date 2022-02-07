@@ -23,6 +23,8 @@ func Save_Game(Name = "Empty"):
 	file.close()
 
 func Sorted_Loading(sort = true, PathToDir = "res://Saves/"):
+	sortfiles = []
+	sortdates = []
 	var dirsave = Directory.new()
 	dirsave.open(PathToDir)
 	dirsave.list_dir_begin(true, false)

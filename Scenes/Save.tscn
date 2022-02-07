@@ -11,11 +11,11 @@ export var x = 0
 export var name_of_save = \"\"
 
 func _on_Save_renamed():
-	$VBoxContainer/HBoxContainer2/Name.text = name_of_save
+	$VBoxContainer/Head/Name.text = name_of_save
 	if int(datetime[\"minute\"]) < 10:
 		datetime[\"minute\"] = \"0\" + str(datetime[\"minute\"])
 	if typeof(datetime) == TYPE_DICTIONARY:
-		$VBoxContainer/HBoxContainer2/DateOfCreated.text = (str(datetime[\"day\"]) + \"/\" + str(datetime[\"month\"]) + \"/\" + str(datetime[\"year\"]) + \"  \" + str(datetime[\"hour\"]) + \":\" + str(datetime[\"minute\"]))
+		$VBoxContainer/Head/DateOfCreated.text = (str(datetime[\"day\"]) + \"/\" + str(datetime[\"month\"]) + \"/\" + str(datetime[\"year\"]) + \"  \" + str(datetime[\"hour\"]) + \":\" + str(datetime[\"minute\"]))
 "
 
 [sub_resource type="DynamicFont" id=2]
@@ -23,7 +23,7 @@ size = 30
 font_data = ExtResource( 1 )
 
 [sub_resource type="DynamicFont" id=3]
-size = 30
+size = 24
 font_data = ExtResource( 1 )
 
 [node name="Save" type="Control"]
@@ -43,12 +43,12 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+[node name="Head" type="HBoxContainer" parent="VBoxContainer"]
 margin_right = 564.0
 margin_bottom = 52.0
 
-[node name="Name" type="Label" parent="VBoxContainer/HBoxContainer2"]
-margin_right = 280.0
+[node name="Name" type="Label" parent="VBoxContainer/Head"]
+margin_right = 400.0
 margin_bottom = 52.0
 rect_min_size = Vector2( 280, 0 )
 size_flags_horizontal = 3
@@ -60,12 +60,11 @@ custom_constants/shadow_offset_y = 3
 custom_fonts/font = SubResource( 2 )
 text = "Name of Save"
 
-[node name="DateOfCreated" type="Label" parent="VBoxContainer/HBoxContainer2"]
-margin_left = 284.0
+[node name="DateOfCreated" type="Label" parent="VBoxContainer/Head"]
+margin_left = 404.0
 margin_right = 564.0
 margin_bottom = 52.0
-rect_min_size = Vector2( 280, 0 )
-size_flags_horizontal = 3
+rect_min_size = Vector2( 160, 0 )
 size_flags_vertical = 3
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 custom_colors/font_color_shadow = Color( 0.294118, 0.635294, 0.737255, 1 )
@@ -73,6 +72,7 @@ custom_constants/shadow_offset_x = 3
 custom_constants/shadow_offset_y = 3
 custom_fonts/font = SubResource( 3 )
 text = " Date:"
+valign = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 margin_top = 56.0

@@ -34,7 +34,6 @@ func Save_pressed():
 func Loading_pressed():
 	SelectedMenu()
 	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = paper
-	$Loading/Back.grab_focus()
 	var sort = not $Loading/HBoxContainer/CheckButton.pressed
 	Saver.Sorted_Loading(sort)
 	var loadscene = load(\"res://Scenes/Save.tscn\")
@@ -50,13 +49,10 @@ func Loading_pressed():
 			$Loading/Scroll/VBoxContainer/Save.name = i.get_basename()
 			#Increasing the scroll area
 			$Loading/Scroll/VBoxContainer.rect_min_size.y += 100
-	Saver.sortfiles = []
-	Saver.sortdates = []
 	$Loading.show()
 func Back_pressed():
 	SelectedMenu()
 	$VBoxContainer/HBoxContainer/CenterContainer/TextureRect.texture = icon
-	$VBoxContainer/HBoxContainer/VBoxContainer/Loading.grab_focus()
 	$Loading.hide()
 	for child in $Loading/Scroll/VBoxContainer.get_children():
 		child.queue_free()
@@ -75,6 +71,8 @@ func _on_LineEdit_text_changed(new_text):
 		i.show()
 		if i.name.countn(new_text) == 0 and new_text != \"\":
 			i.hide()
+			$Loading/Scroll/VBoxContainer.rect_min_size.y -= 100
+			
 	
 func SelectedMenu():
 	for button in get_tree().get_nodes_in_group(\"MenuB\"):

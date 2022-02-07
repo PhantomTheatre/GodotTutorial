@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Sprites/widelands.png" type="Texture" id=1]
 [ext_resource path="res://Scenes/Button.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Sprites/paper.jpg" type="Texture" id=3]
 [ext_resource path="res://Sprites/icon.png" type="Texture" id=4]
+[ext_resource path="res://Fonts/Readiculous.ttf" type="DynamicFontData" id=5]
 
 [sub_resource type="GDScript" id=3]
 script/source = "extends Control
@@ -15,59 +16,116 @@ func _input(event):
 		if Global.Pause:
 			$Buttons/Continue.grab_focus()
 		visible = not visible
-
+		$Buttons.visible = true
+		$SaveMenu.visible = false
+		
 	#Button Pressed
 func Continue_pressed():	#Again to adventures!
 	Global.Pause = not Global.Pause
-	visible = not visible
-	$Buttons.visible = true
-	$SaveMenu.visible = false
-	$SaveMenu/LineEdit.text = \"Name of your save\"
+	self.hide()
 func ToMenu_pressed():	#I'll be back
 	Global.Pause = not Global.Pause
 	get_tree().change_scene(\"res://Scenes/Control.tscn\")
 func Save_pressed():	#Save menu
-	$Buttons.visible = false
-	$SaveMenu.visible = true
-
+	$Buttons.hide()
+	$SaveMenu.show()
+	$SaveMenu/LineEdit.show()
+	$SaveMenu/Back/SaveImg.show()
+	$SaveMenu/Resave/Button/Label.show()
+	$SaveMenu/LineEdit.text = \"Name of your save\"
+	$SaveMenu/OptionButton.hide()
 func _on_SaveImg_pressed():		#I'm add there image with green check mark
-	Saver.Save_Game($SaveMenu/LineEdit.text)
-	$Buttons.show()
-	$SaveMenu.hide()
-func Back_pressed():		#Clever
-	if $SaveMenu/Resave/Button/Label.visible:
-		$Buttons.visible = true
-		$SaveMenu.visible = false
+	Saver.Sorted_Loading(false) 
+	if $SaveMenu/LineEdit.visible:
+		var error = false
+		var coincidence = false
+		for i in $SaveMenu/LineEdit.text:
+			for n in [\":\", \"\\\"\", \"@\", \"^\", \"\\\\\",\"$\", \"/\", \">\", \"<\", \";\", \"*\", \".\"]:
+				if n == i or i == \"\": error = true
+		for i in Saver.sortfiles:
+			if i  == $SaveMenu/LineEdit.text + \".json\":
+				coincidence = true
+		if error:
+			$ImageBox/Title/Successful.text = \"Invalid name of file\"
+			$ImageBox/Title/Successful.self_modulate = Color(1,0.25,0.25,1)
+			$ImageBox/Title/Successful.show()
+		elif coincidence:
+			$WarningWindow.show()
+		else:
+			Saver.Save_Game($SaveMenu/LineEdit.text)
+			$ImageBox/Title/Successful.text = \"Save Successful!\"
+			$ImageBox/Title/Successful.self_modulate = Color(0,1,0,1)
+			$Buttons.show()
+			$SaveMenu.hide()
+			$ImageBox/Title/Successful.show()
 	else:
-		$SaveMenu/Resave/Button/Label.show()
+		$ImageBox/Title/Successful.text = \"Save Successful!\"
+		$ImageBox/Title/Successful.self_modulate = Color(0,1,0,1)
+		$ImageBox/Title/Successful.show()
+		Saver.Save_Game($SaveMenu/OptionButton.get_item_text($SaveMenu/OptionButton.selected))
+		$Buttons.show()
+		$SaveMenu.hide()
+func Back_pressed():		#work everytime
+	if $SaveMenu/LineEdit.visible:	#New save to Interfase
+		$Buttons.show()
+		$SaveMenu.hide()
+	else:
+		$SaveMenu/Resave/Button/Label.show()	#Resave to New save
 		$SaveMenu/LineEdit.show()
 		$SaveMenu/OptionButton.hide()
-		$SaveMenu/OptionButton.clear()
 		$SaveMenu/LineEdit.text = \"Name of your save\"
 func Resave_pressed():		#Resave menu
-	Saver.sortfiles = []
-	Saver.sortdates = []
 	$SaveMenu/LineEdit.hide()
+	$SaveMenu/Back/SaveImg.hide()
 	$SaveMenu/OptionButton.show()
 	$SaveMenu/OptionButton.clear()
 	$SaveMenu/Resave/Button/Label.hide()
 	Saver.Sorted_Loading()
 	$SaveMenu/OptionButton.add_item(\"Press to select your save:\")
+	$SaveMenu/OptionButton.set_item_disabled(0, true)
 	for i in Saver.sortfiles:
-		$SaveMenu/OptionButton.add_item(i.get_basename())
+		$SaveMenu/OptionButton.add_item(i.get_basename(), 0)
 func _on_OptionButton_item_selected(index):		#Resave button
-	$SaveMenu/LineEdit.text = $SaveMenu/OptionButton.get_item_text(index)
-	$SaveMenu/OptionButton.clear()
-	Saver.Save_Game($SaveMenu/LineEdit.text)
-	$Buttons.show()
-	$SaveMenu.hide()
-	$SaveMenu/Resave/Button/Label.show()
-	Saver.sortfiles = []
-	Saver.sortdates = []
+	index + index #That's againts for error
+	$SaveMenu/Back/SaveImg.show()
+	
 func _on_LineEdit_focus_entered():		#That's for not deleting all the time: \"Name of your save\"
 	if $SaveMenu/LineEdit.text == \"Name of your save\":
 		$SaveMenu/LineEdit.text = \"\"
+func _on_LineEdit_text_entered(new_text):	#That's for save by enter
+	new_text + \"\"
+	_on_SaveImg_pressed()
+		
+func _process(delta):		#Invisible for text \"Successful\"
+	if $ImageBox/Title/Successful.visible:
+		$ImageBox/Title/Successful.self_modulate[3] -= 0.006
+		delta = delta
+		if $ImageBox/Title/Successful.self_modulate[3] <= 0:
+			$ImageBox/Title/Successful.hide()
+			
+	#You want to resave?
+func Yes_pressed():
+	$ImageBox/Title/Successful.text = \"Save Successful!\"
+	$ImageBox/Title/Successful.self_modulate = Color(0,1,0,1)
+	if $SaveMenu/LineEdit.visible:
+		Saver.Save_Game($SaveMenu/LineEdit.text)
+	else:
+		Saver.Save_Game($SaveMenu/OptionButton.get_item_text($SaveMenu/OptionButton.selected))
+	$Buttons.show()
+	$SaveMenu.hide()
+	$WarningWindow.hide()
+	$ImageBox/Title/Successful.show()
+func No_pressed():
+	$WarningWindow.hide()
 "
+
+[sub_resource type="DynamicFont" id=4]
+size = 24
+font_data = ExtResource( 5 )
+
+[sub_resource type="DynamicFont" id=5]
+size = 15
+font_data = ExtResource( 5 )
 
 [node name="Interface" type="Control"]
 anchor_right = 1.0
@@ -102,6 +160,23 @@ margin_bottom = 107.0
 size_flags_horizontal = 6
 size_flags_vertical = 0
 texture = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Successful" type="Label" parent="ImageBox/Title"]
+visible = false
+anchor_left = 1.065
+anchor_top = -0.065
+anchor_right = 1.451
+anchor_bottom = 0.327
+margin_left = -0.0950012
+margin_top = -0.0449996
+margin_right = 0.098999
+margin_bottom = 0.0109978
+custom_colors/font_color = Color( 0.52549, 0.772549, 0.298039, 1 )
+custom_fonts/font = SubResource( 4 )
+text = "Save successful!"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -179,12 +254,26 @@ margin_bottom = 55.0
 text = "Back"
 control_node = "Main/CanvasLayer/Interface"
 
+[node name="SaveImg" type="TextureButton" parent="SaveMenu/Back"]
+anchor_left = 1.005
+anchor_top = 1.081
+anchor_right = 1.221
+anchor_bottom = 1.879
+margin_left = -0.0200043
+margin_right = -0.0840149
+texture_normal = ExtResource( 4 )
+texture_pressed = ExtResource( 4 )
+texture_hover = ExtResource( 3 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="OptionButton" type="OptionButton" parent="SaveMenu"]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_top = 59.0
-margin_bottom = 59.0
+margin_top = 50.0
+margin_right = 204.0
+margin_bottom = 95.0
 rect_min_size = Vector2( 0, 45 )
 size_flags_horizontal = 3
 text = "Press to select your save"
@@ -202,19 +291,6 @@ size_flags_horizontal = 3
 text = "Name of your save"
 align = 1
 max_length = 17
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="SaveImg" type="TextureButton" parent="SaveMenu/LineEdit"]
-anchor_left = 1.0
-anchor_right = 1.0
-margin_right = 45.0
-margin_bottom = 45.0
-texture_normal = ExtResource( 4 )
-texture_pressed = ExtResource( 4 )
-texture_hover = ExtResource( 3 )
-expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -238,6 +314,62 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="WarningWindow" type="Control" parent="."]
+visible = false
+anchor_left = 0.206
+anchor_top = 0.234
+anchor_right = 0.792
+anchor_bottom = 0.892
+margin_left = 0.0559845
+margin_top = 0.599991
+margin_right = -0.00805664
+margin_bottom = -0.200012
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Image" type="TextureRect" parent="WarningWindow"]
+anchor_left = 0.2
+anchor_top = 0.18
+anchor_right = 0.8
+anchor_bottom = 0.62
+texture = ExtResource( 3 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Warning" type="Label" parent="WarningWindow"]
+margin_left = 150.0
+margin_top = 90.62
+margin_right = 450.0
+margin_bottom = 171.62
+custom_colors/font_color = Color( 0.192157, 0.14902, 0.0627451, 1 )
+custom_fonts/font = SubResource( 5 )
+text = "A save with this name
+has already been created. 
+Do you want to overwrite your save?"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Yes" parent="WarningWindow" instance=ExtResource( 2 )]
+anchor_left = 0.23
+anchor_top = 0.45
+anchor_right = 0.4
+anchor_bottom = 0.52
+text = "Yes"
+control_node = "Main/CanvasLayer/Interface"
+
+[node name="No" parent="WarningWindow" instance=ExtResource( 2 )]
+anchor_left = 0.6
+anchor_top = 0.45
+anchor_right = 0.77
+anchor_bottom = 0.52
+text = "No"
+control_node = "Main/CanvasLayer/Interface"
+
+[connection signal="pressed" from="SaveMenu/Back/SaveImg" to="." method="_on_SaveImg_pressed"]
 [connection signal="item_selected" from="SaveMenu/OptionButton" to="." method="_on_OptionButton_item_selected"]
 [connection signal="focus_entered" from="SaveMenu/LineEdit" to="." method="_on_LineEdit_focus_entered"]
-[connection signal="pressed" from="SaveMenu/LineEdit/SaveImg" to="." method="_on_SaveImg_pressed"]
+[connection signal="text_entered" from="SaveMenu/LineEdit" to="." method="_on_LineEdit_text_entered"]

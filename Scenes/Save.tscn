@@ -12,6 +12,8 @@ export var name_of_save = \"\"
 
 func _on_Save_renamed():
 	$VBoxContainer/HBoxContainer2/Name.text = name_of_save
+	if int(datetime[\"minute\"]) < 10:
+		datetime[\"minute\"] = \"0\" + str(datetime[\"minute\"])
 	if typeof(datetime) == TYPE_DICTIONARY:
 		$VBoxContainer/HBoxContainer2/DateOfCreated.text = (str(datetime[\"day\"]) + \"/\" + str(datetime[\"month\"]) + \"/\" + str(datetime[\"year\"]) + \"  \" + str(datetime[\"hour\"]) + \":\" + str(datetime[\"minute\"]))
 "

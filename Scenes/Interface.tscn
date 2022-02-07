@@ -17,29 +17,56 @@ func _input(event):
 		visible = not visible
 
 	#Button Pressed
-func Continue_pressed():
+func Continue_pressed():	#Again to adventures!
 	Global.Pause = not Global.Pause
 	visible = not visible
 	$Buttons.visible = true
 	$SaveMenu.visible = false
 	$SaveMenu/LineEdit.text = \"Name of your save\"
-func ToMenu_pressed():
+func ToMenu_pressed():	#I'll be back
 	Global.Pause = not Global.Pause
 	get_tree().change_scene(\"res://Scenes/Control.tscn\")
-func Save_pressed():
+func Save_pressed():	#Save menu
 	$Buttons.visible = false
 	$SaveMenu.visible = true
 
-func _on_Save_pressed():
+func _on_SaveImg_pressed():		#I'm add there image with green check mark
 	Saver.Save_Game($SaveMenu/LineEdit.text)
-	$Buttons.visible = true
-	$SaveMenu.visible = false
-	$SaveMenu/LineEdit.text = \"Name of your save\"
-func Back_pressed():
-	for i in get_tree().get_nodes_in_group(\"Save\"):
+	$Buttons.show()
+	$SaveMenu.hide()
+func Back_pressed():		#Clever
+	if $SaveMenu/Resave/Button/Label.visible:
 		$Buttons.visible = true
 		$SaveMenu.visible = false
-	$SaveMenu/LineEdit.text = \"Name of your save\"
+	else:
+		$SaveMenu/Resave/Button/Label.show()
+		$SaveMenu/LineEdit.show()
+		$SaveMenu/OptionButton.hide()
+		$SaveMenu/OptionButton.clear()
+		$SaveMenu/LineEdit.text = \"Name of your save\"
+func Resave_pressed():		#Resave menu
+	Saver.sortfiles = []
+	Saver.sortdates = []
+	$SaveMenu/LineEdit.hide()
+	$SaveMenu/OptionButton.show()
+	$SaveMenu/OptionButton.clear()
+	$SaveMenu/Resave/Button/Label.hide()
+	Saver.Sorted_Loading()
+	$SaveMenu/OptionButton.add_item(\"Press to select your save:\")
+	for i in Saver.sortfiles:
+		$SaveMenu/OptionButton.add_item(i.get_basename())
+func _on_OptionButton_item_selected(index):		#Resave button
+	$SaveMenu/LineEdit.text = $SaveMenu/OptionButton.get_item_text(index)
+	$SaveMenu/OptionButton.clear()
+	Saver.Save_Game($SaveMenu/LineEdit.text)
+	$Buttons.show()
+	$SaveMenu.hide()
+	$SaveMenu/Resave/Button/Label.show()
+	Saver.sortfiles = []
+	Saver.sortdates = []
+func _on_LineEdit_focus_entered():		#That's for not deleting all the time: \"Name of your save\"
+	if $SaveMenu/LineEdit.text == \"Name of your save\":
+		$SaveMenu/LineEdit.text = \"\"
 "
 
 [node name="Interface" type="Control"]
@@ -148,16 +175,30 @@ __meta__ = {
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_right = 204.0
-margin_bottom = 51.0
+margin_bottom = 55.0
 text = "Back"
 control_node = "Main/CanvasLayer/Interface"
 
-[node name="LineEdit" type="LineEdit" parent="SaveMenu"]
-margin_top = 55.0
-margin_right = 204.0
-margin_bottom = 107.0
+[node name="OptionButton" type="OptionButton" parent="SaveMenu"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 59.0
+margin_bottom = 59.0
+rect_min_size = Vector2( 0, 45 )
 size_flags_horizontal = 3
-size_flags_vertical = 3
+text = "Press to select your save"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LineEdit" type="LineEdit" parent="SaveMenu"]
+margin_top = 59.0
+margin_right = 204.0
+margin_bottom = 104.0
+rect_min_size = Vector2( 0, 45 )
+size_flags_horizontal = 3
 text = "Name of your save"
 align = 1
 max_length = 17
@@ -165,11 +206,11 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Save" type="TextureButton" parent="SaveMenu/LineEdit"]
+[node name="SaveImg" type="TextureButton" parent="SaveMenu/LineEdit"]
 anchor_left = 1.0
 anchor_right = 1.0
-margin_right = 50.0
-margin_bottom = 50.0
+margin_right = 45.0
+margin_bottom = 45.0
 texture_normal = ExtResource( 4 )
 texture_pressed = ExtResource( 4 )
 texture_hover = ExtResource( 3 )
@@ -181,20 +222,22 @@ __meta__ = {
 [node name="Resave" parent="SaveMenu" instance=ExtResource( 2 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 111.0
+margin_top = 108.0
 margin_right = 204.0
-margin_bottom = 162.0
+margin_bottom = 163.0
 text = "Resave"
 control_node = "Main/CanvasLayer/Interface"
 
 [node name="MarginContainer" type="MarginContainer" parent="SaveMenu"]
-margin_top = 166.0
+margin_top = 167.0
 margin_right = 204.0
 margin_bottom = 360.0
 size_flags_vertical = 3
-size_flags_stretch_ratio = 3.75
+size_flags_stretch_ratio = 3.5
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[connection signal="pressed" from="SaveMenu/LineEdit/Save" to="." method="_on_Save_pressed"]
+[connection signal="item_selected" from="SaveMenu/OptionButton" to="." method="_on_OptionButton_item_selected"]
+[connection signal="focus_entered" from="SaveMenu/LineEdit" to="." method="_on_LineEdit_focus_entered"]
+[connection signal="pressed" from="SaveMenu/LineEdit/SaveImg" to="." method="_on_SaveImg_pressed"]
